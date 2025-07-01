@@ -3,6 +3,10 @@
 import { useState, useEffect, useRef } from "react"
 import type React from "react"
 
+// Chart imports
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts"
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+
 // Supabase imports
 import {
   fetchUsers,
@@ -3403,21 +3407,41 @@ export default function ProductRegistrationApp() {
                         <CardDescription>Meest gebruikte producten</CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <div className="space-y-3">
-                          {getTopProducts().map(([product, count], index) => (
-                            <div key={product} className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <div className="w-6 h-6 rounded-full bg-orange-100 text-orange-600 text-xs flex items-center justify-center font-medium">
-                                  {index + 1}
-                                </div>
-                                <span className="text-sm font-medium truncate" title={product}>
-                                  {product.length > 20 ? `${product.substring(0, 20)}...` : product}
-                                </span>
-                              </div>
-                              <span className="text-sm text-gray-600">{count}x</span>
-                            </div>
-                          ))}
-                        </div>
+                        <ChartContainer
+                          config={{
+                            count: {
+                              label: "Aantal keer gebruikt",
+                              color: "hsl(var(--chart-1))",
+                            },
+                          }}
+                          className="h-[300px]"
+                        >
+                          <BarChart
+                            data={getTopProducts().map(([product, count]) => ({
+                              product: product.length > 15 ? `${product.substring(0, 15)}...` : product,
+                              count: count,
+                              fullProduct: product,
+                            }))}
+                            margin={{
+                              top: 20,
+                              right: 30,
+                              left: 20,
+                              bottom: 60,
+                            }}
+                          >
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="product" angle={-45} textAnchor="end" height={80} fontSize={12} />
+                            <YAxis />
+                            <ChartTooltip
+                              content={<ChartTooltipContent />}
+                              formatter={(value, name, props) => [
+                                `${value}x gebruikt`,
+                                props.payload?.fullProduct || name,
+                              ]}
+                            />
+                            <Bar dataKey="count" fill="var(--color-count)" />
+                          </BarChart>
+                        </ChartContainer>
                       </CardContent>
                     </Card>
 
