@@ -3,10 +3,6 @@
 import { useState, useEffect, useRef } from "react"
 import type React from "react"
 
-// Chart imports
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts"
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-
 // Supabase imports
 import {
   fetchUsers,
@@ -3407,41 +3403,36 @@ export default function ProductRegistrationApp() {
                         <CardDescription>Meest gebruikte producten</CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <ChartContainer
-                          config={{
-                            count: {
-                              label: "Aantal keer gebruikt",
-                              color: "hsl(var(--chart-1))",
-                            },
-                          }}
-                          className="h-[300px]"
-                        >
-                          <BarChart
-                            data={getTopProducts().map(([product, count]) => ({
-                              product: product.length > 15 ? `${product.substring(0, 15)}...` : product,
-                              count: count,
-                              fullProduct: product,
-                            }))}
-                            margin={{
-                              top: 20,
-                              right: 30,
-                              left: 20,
-                              bottom: 60,
-                            }}
-                          >
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="product" angle={-45} textAnchor="end" height={80} fontSize={12} />
-                            <YAxis />
-                            <ChartTooltip
-                              content={<ChartTooltipContent />}
-                              formatter={(value, name, props) => [
-                                `${value}x gebruikt`,
-                                props.payload?.fullProduct || name,
-                              ]}
-                            />
-                            <Bar dataKey="count" fill="var(--color-count)" />
-                          </BarChart>
-                        </ChartContainer>
+                        <div className="space-y-3">
+                          {getTopProducts().map(([product, count], index) => {
+                            const maxCount = Math.max(...getTopProducts().map(([, c]) => c))
+                            const percentage = (count / maxCount) * 100
+                            const colors = ["#ff6b6b", "#4ecdc4", "#45b7d1", "#96ceb4", "#feca57"]
+                            const color = colors[index % colors.length]
+
+                            return (
+                              <div key={product} className="flex items-center justify-between">
+                                <div className="flex-1 mr-4">
+                                  <div className="flex items-center justify-between mb-1">
+                                    <span className="text-sm font-medium truncate" title={product}>
+                                      {product.length > 35 ? `${product.substring(0, 35)}...` : product}
+                                    </span>
+                                    <span className="text-sm font-bold text-gray-900 ml-2">{count}</span>
+                                  </div>
+                                  <div className="w-full bg-gray-200 rounded-full h-2">
+                                    <div
+                                      className="h-2 rounded-full transition-all duration-300"
+                                      style={{
+                                        width: `${percentage}%`,
+                                        backgroundColor: color,
+                                      }}
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
                       </CardContent>
                     </Card>
 
